@@ -36,10 +36,10 @@ class AboutActivity : AppCompatActivity(), MPVLib.LogObserver {
 
         logs = "mpv-android ${BuildConfig.VERSION_NAME} / ${BuildConfig.VERSION_CODE} (${BuildConfig.BUILD_TYPE})\n"
 
-        // create mpv context to capture version info from log
+        // Register before creating/initializing MPV so initialization logs are captured.
+        MPVLib.addLogObserver(this)
         MPVLib.create(this)
         mpvDestroyed = false
-        MPVLib.addLogObserver(this)
         MPVLib.init()
     }
 
@@ -50,11 +50,12 @@ class AboutActivity : AppCompatActivity(), MPVLib.LogObserver {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        MPVLib.removeLogObserver(this)
         if (!mpvDestroyed) {
             MPVLib.destroy()
             mpvDestroyed = true
         }
+        super.onDestroy()
     }
 
     override fun logMessage(prefix: String, level: Int, text: String) {
